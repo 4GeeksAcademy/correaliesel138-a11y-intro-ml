@@ -12,8 +12,8 @@ st.set_page_config(
 # Cargar los modelos y datos guardados
 @st.cache_resource
 def load_models():
-    knn_model = load(open("models/knn_wine_model.sav", "rb"))
-    scaler = load(open("models/knn_wine_scaler.sav", "rb"))
+    knn_model = load(open("/workspaces/correaliesel138-a11y-intro-ml/src/models/knn_wine_model.sav", "rb"))
+    scaler = load(open("/workspaces/correaliesel138-a11y-intro-ml/src/models/knn_wine_scaler.sav", "rb"))
     return knn_model, scaler
 
 # Cargar modelos
@@ -172,7 +172,7 @@ if st.button("🔮 Predecir Calidad del Vino", type="primary"):
         st.dataframe(features_df)
 
 # Información adicional en el sidebar
-st.sidebar.title("ℹ️ Información")
+st.sidebar.title("Información")
 st.sidebar.markdown("""
 ### Sobre el modelo
 Este modelo utiliza el algoritmo K-Nearest Neighbors (KNN) 
