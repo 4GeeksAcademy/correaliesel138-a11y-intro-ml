@@ -1,3 +1,1 @@
-__pycache__
-.env
-.learndata/raw/Global Health Statistics.csv
+data/
