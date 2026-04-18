@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predictor de Calidad del Vino</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #1a0a0a;
+      --card:    #2a1010;
+      --border:  #4a2020;
+      --wine:    #c0392b;
+      --gold:    #d4a843;
+      --text:    #f0e6e6;
+      --muted:   #9a7070;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger:  #c0392b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 10% 30%, rgba(192,57,43,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 90% 70%, rgba(212,168,67,0.08) 0%, transparent 60%);
+    }
+
+    header {
+      text-align: center;
+      padding: 3rem 2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    header p { color: var(--muted); font-size: 0.95rem; }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .field label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .field small {
+      font-size: 0.7rem;
+      color: #6a4040;
+    }
+
+    .field input {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus { border-color: var(--wine); }
+    .field input::placeholder { color: #4a2020; }
+
+    .btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--wine);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* Resultado */
+    .result { display: none; }
+    .result.show {
+      display: block;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .result-inner {
+      border-radius: 14px;
+      padding: 1.8rem;
+      text-align: center;
+    }
+
+    .result-inner.success { background: rgba(39,174,96,0.12); border: 1px solid rgba(39,174,96,0.35); }
+    .result-inner.warning { background: rgba(243,156,18,0.12); border: 1px solid rgba(243,156,18,0.35); }
+    .result-inner.danger  { background: rgba(192,57,43,0.12);  border: 1px solid rgba(192,57,43,0.35); }
+
+    .result-emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    .result-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .result-inner.success .result-label { color: var(--success); }
+    .result-inner.warning .result-label { color: var(--warning); }
+    .result-inner.danger  .result-label { color: var(--danger); }
+
+    .result-conf {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .bar-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      max-width: 300px;
+      margin: 0 auto 1rem;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+
+    .result-inner.success .bar-fill { background: var(--success); }
+    .result-inner.warning .bar-fill { background: var(--warning); }
+    .result-inner.danger  .bar-fill { background: var(--danger); }
+
+    .disclaimer {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 580px) {
+      .grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🍷 Wine Quality AI</h1>
+  <p>Introduce las características fisicoquímicas del vino y el modelo predecirá su calidad</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">📋 Características del vino</div>
+    <form action="/predict" method="POST">
+      <div class="grid">
+
+        <div class="field">
+          <label>Acidez fija</label>
+          <small>g/dm³ — ácido tartárico</small>
+          <input type="number" name="fixed_acidity" step="0.1" placeholder="Ej: 7.4" required>
+        </div>
+
+        <div class="field">
+          <label>Acidez volátil</label>
+          <small>g/dm³ — ácido acético</small>
+          <input type="number" name="volatile_acidity" step="0.01" placeholder="Ej: 0.70" required>
+        </div>
+
+        <div class="field">
+          <label>Ácido cítrico</label>
+          <small>g/dm³</small>
+          <input type="number" name="citric_acid" step="0.01" placeholder="Ej: 0.00" required>
+        </div>
+
+        <div class="field">
+          <label>Azúcar residual</label>
+          <small>g/dm³</small>
+          <input type="number" name="residual_sugar" step="0.1" placeholder="Ej: 1.9" required>
+        </div>
+
+        <div class="field">
+          <label>Cloruros</label>
+          <small>g/dm³ — sal sódica</small>
+          <input type="number" name="chlorides" step="0.001" placeholder="Ej: 0.076" required>
+        </div>
+
+        <div class="field">
+          <label>SO₂ libre</label>
+          <small>mg/dm³</small>
+          <input type="number" name="free_sulfur_dioxide" step="1" placeholder="Ej: 11" required>
+        </div>
+
+        <div class="field">
+          <label>SO₂ total</label>
+          <small>mg/dm³</small>
+          <input type="number" name="total_sulfur_dioxide" step="1" placeholder="Ej: 34" required>
+        </div>
+
+        <div class="field">
+          <label>Densidad</label>
+          <small>g/cm³</small>
+          <input type="number" name="density" step="0.0001" placeholder="Ej: 0.9978" required>
+        </div>
+
+        <div class="field">
+          <label>pH</label>
+          <small>0–14</small>
+          <input type="number" name="pH" step="0.01" placeholder="Ej: 3.51" required>
+        </div>
+
+        <div class="field">
+          <label>Sulfatos</label>
+          <small>g/dm³</small>
+          <input type="number" name="sulphates" step="0.01" placeholder="Ej: 0.56" required>
+        </div>
+
+        <div class="field">
+          <label>Alcohol</label>
+          <small>% volumen</small>
+          <input type="number" name="alcohol" step="0.1" placeholder="Ej: 9.4" required>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn">🔍 Predecir calidad</button>
+    </form>
+  </div>
+
+  {% if show_result %}
+  <div class="result show">
+    <div class="result-inner {{ color }}">
+      <div class="result-emoji">{{ emoji }}</div>
+      <div class="result-label">{{ resultado }}</div>
+      <div class="result-conf">Confianza del modelo: {{ confianza }}%</div>
+      <div class="bar-wrap">
+        <div class="bar-fill" style="width: {{ confianza }}%"></div>
+      </div>
+      <div class="disclaimer">
+        Predicción basada en KNN · Dataset Wine Quality (UCI)
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<footer>
+  Desarrollado con Flask + Scikit-learn · 4Geeks Academy Bootcamp
+</footer>
+
+</body>
+</html>
